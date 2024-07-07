@@ -1,0 +1,4 @@
+2024-07-07T12:47:18.867Z error: middlewareError
+2024-07-07 19:51:05 error: userId is null or undefined in insertData request
+2024-07-07 19:51:29 error: userId is null or undefined in insertData request
+2024-07-07 19:52:41 error: userId is null or undefined in insertData request
