@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { jwtDecode } from 'jwt-decode';
+
 
 const AuthContext = createContext();
 
@@ -13,12 +15,27 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('userId', userId);
     };
 
-    const logout = () => {
+    const logout = useCallback(() => {
         setAuthToken(null);
         setUserId(null);
         localStorage.removeItem('authToken');
         localStorage.removeItem('userId');
-    };
+    }, [setAuthToken, setUserId]);
+
+    useEffect(() => {
+        const checkTokenExpiration = () => {
+            if (authToken) {
+                const decodedToken = jwtDecode(authToken);
+                const currentTime = Date.now() / 12000;
+
+                if (decodedToken.exp < currentTime) {
+                    logout();
+                }
+            }
+        };
+
+        checkTokenExpiration();
+    }, [authToken, logout]);
 
     return (
         <AuthContext.Provider value={{ authToken, userId, login, logout }}>

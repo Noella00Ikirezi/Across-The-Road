@@ -8,7 +8,7 @@ const Navbar = () => {
     useEffect(() => {
         const fetchNavbarData = async () => {
             try {
-                const response = await apiClient.get('/fetchAllPages');
+                const response = await apiClient.get('/pages');
                 setNavbarData(response.data.data[0].navbar);
             } catch (error) {
                 console.error('Error fetching navbar data:', error);

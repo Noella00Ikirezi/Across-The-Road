@@ -13,7 +13,7 @@ import Blog from './components/Homepage/Blog';
 import Activity1 from './components/pages/Activity1';
 import Activity2 from './components/pages/Activity2';
 import Activity3 from './components/pages/Activity3';
-import AdminBoard from './components/Homepage/AdminBoard';
+
 
 function App() {
     return (
@@ -32,7 +32,7 @@ function App() {
                     <Route path="/activity2" element={<Activity2 />} />
                     <Route path="/activity3" element={<Activity3 />} />
                     <Route path="/profile" element={<Profile />} />
-                    <Route path="/admin" element={<AdminBoard />} />
+                    <Route path="/admin" element={<CMSAdmin/>} />
                 </Routes>
             </Router>
         </AuthProvider>

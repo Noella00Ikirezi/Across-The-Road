@@ -14,7 +14,7 @@ const Profile = () => {
     const [profileData, setProfileData] = useState({
         firstName: '',
         lastName: '',
-        birthdate: '',
+        birthday: '',
         phone: '',
         email: '',
         avatar: '',
@@ -33,7 +33,7 @@ const Profile = () => {
                 setProfileData({
                     firstName: user.first_name || '',
                     lastName: user.last_name || '',
-                    birthdate: user.birthdate || '',
+                    birthday: user.birthday || '',
                     phone: user.phone || '',
                     email: user.email || '',
                     avatar: user.avatar || '',
@@ -48,9 +48,12 @@ const Profile = () => {
         const fetchUserPages = async () => {
             try {
                 const response = await fetchPagesByUserId(userId);
-                setUserPages(response.data);
+                setUserPages(response || []); // Ensure response is not null or undefined
             } catch (error) {
                 console.error('Error fetching user pages:', error);
+                setUserPages([]); // Set as empty array if there is an error
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -65,7 +68,7 @@ const Profile = () => {
     };
 
     const handleSave = async () => {
-        if (!profileData.firstName || !profileData.lastName || !profileData.birthdate || !profileData.email || !profileData.phone) {
+        if (!profileData.firstName || !profileData.lastName || !profileData.birthday || !profileData.email || !profileData.phone) {
             setError('All fields are required');
             return;
         }
@@ -73,7 +76,7 @@ const Profile = () => {
             await updateProfile({
                 first_name: profileData.firstName,
                 last_name: profileData.lastName,
-                birthdate: profileData.birthdate,
+                birthday: profileData.birthday,
                 email: profileData.email,
                 phone: profileData.phone,
                 avatar: profileData.avatar,
@@ -112,120 +115,96 @@ const Profile = () => {
                     backgroundColor: "#010132",
                     minHeight: "100vh",
                     padding: "2rem",
-                    color: "white"
+                    color: "white",
+                    overflow: "hidden" // Prevent scrolling
                 }}
             >
-                <Grid container direction="column" sx={{ overflowX: 'hidden' }}>
-                    <Grid item xs={12} md={6}>
-                        <img
-                            alt="avatar"
-                            style={{
-                                width: '100%',
-                                height: '35vh',
-                                objectFit: 'cover',
-                                objectPosition: '50% 50%',
-                                position: 'relative',
-                            }}
-                            src="https://iris2.gettimely.com/images/default-cover-image.jpg"
-                        />
+                <Grid container direction="column" alignItems="center" sx={{ overflowX: 'hidden' }}>
+                    <Grid item xs={12} md={8}>
+                        <Card sx={{ mb: 4 }}>
+                            <CardContent>
+                                <Grid container spacing={3} justifyContent="center">
+                                    <Grid item xs={12} sm={3} display="flex" justifyContent="center">
+                                        <Avatar
+                                            src={profileData.avatar || defaultAvatar}
+                                            sx={{ width: 100, height: 100 }}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} sm={9}>
+                                        <Typography variant="h5" align="center" gutterBottom>
+                                            {fullName}
+                                        </Typography>
+                                        <form>
+                                            <Grid container spacing={3}>
+                                                <Grid item xs={12} sm={6}>
+                                                    <TextField
+                                                        fullWidth
+                                                        label="First Name"
+                                                        name="firstName"
+                                                        value={profileData.firstName}
+                                                        onChange={handleChange}
+                                                        disabled={!editMode}
+                                                    />
+                                                </Grid>
+                                                <Grid item xs={12} sm={6}>
+                                                    <TextField
+                                                        fullWidth
+                                                        label="Last Name"
+                                                        name="lastName"
+                                                        value={profileData.lastName}
+                                                        onChange={handleChange}
+                                                        disabled={!editMode}
+                                                    />
+                                                </Grid>
+                                                <Grid item xs={12} sm={6}>
+                                                    <TextField
+                                                        fullWidth
+                                                        label="Birthday"
+                                                        name="birthday"
+                                                        value={profileData.birthday}
+                                                        onChange={handleChange}
+                                                        disabled={!editMode}
+                                                    />
+                                                </Grid>
+                                                <Grid item xs={12} sm={6}>
+                                                    <TextField
+                                                        fullWidth
+                                                        label="Phone"
+                                                        name="phone"
+                                                        value={profileData.phone}
+                                                        onChange={handleChange}
+                                                        disabled={!editMode}
+                                                    />
+                                                </Grid>
+                                                <Grid item xs={12} sm={6}>
+                                                    <TextField
+                                                        fullWidth
+                                                        label="Email"
+                                                        name="email"
+                                                        value={profileData.email}
+                                                        onChange={handleChange}
+                                                        disabled={!editMode}
+                                                    />
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    {editMode ? (
+                                                        <Button variant="contained" color="primary" fullWidth onClick={handleSave}>
+                                                            Save Changes
+                                                        </Button>
+                                                    ) : (
+                                                        <Button variant="contained" color="primary" fullWidth onClick={() => setEditMode(true)}>
+                                                            Edit Profile
+                                                        </Button>
+                                                    )}
+                                                </Grid>
+                                            </Grid>
+                                        </form>
+                                    </Grid>
+                                </Grid>
+                            </CardContent>
+                        </Card>
                     </Grid>
-
-                    <Grid
-                        container
-                        direction={{ xs: 'column', md: 'row' }}
-                        spacing={3}
-                        sx={{
-                            marginTop: '1rem',
-                            px: { xs: 0, md: 7 },
-                        }}
-                    >
-                        <Grid item md={3}>
-                            <Card>
-                                <CardContent>
-                                    <Avatar
-                                        src={profileData.avatar || defaultAvatar}
-                                        sx={{ width: 100, height: 100, margin: '0 auto' }}
-                                    />
-                                    <Typography variant="h5" align="center" gutterBottom>
-                                        {fullName}
-                                    </Typography>
-                                </CardContent>
-                            </Card>
-                        </Grid>
-
-                        <Grid item md={9}>
-                            <Card>
-                                <CardContent>
-                                    <form>
-                                        <Grid container spacing={3}>
-                                            <Grid item xs={12} sm={6}>
-                                                <TextField
-                                                    fullWidth
-                                                    label="First Name"
-                                                    name="firstName"
-                                                    value={profileData.firstName}
-                                                    onChange={handleChange}
-                                                    disabled={!editMode}
-                                                />
-                                            </Grid>
-                                            <Grid item xs={12} sm={6}>
-                                                <TextField
-                                                    fullWidth
-                                                    label="Last Name"
-                                                    name="lastName"
-                                                    value={profileData.lastName}
-                                                    onChange={handleChange}
-                                                    disabled={!editMode}
-                                                />
-                                            </Grid>
-                                            <Grid item xs={12} sm={6}>
-                                                <TextField
-                                                    fullWidth
-                                                    label="Birthdate"
-                                                    name="birthdate"
-                                                    value={profileData.birthdate}
-                                                    onChange={handleChange}
-                                                    disabled={!editMode}
-                                                />
-                                            </Grid>
-                                            <Grid item xs={12} sm={6}>
-                                                <TextField
-                                                    fullWidth
-                                                    label="Phone"
-                                                    name="phone"
-                                                    value={profileData.phone}
-                                                    onChange={handleChange}
-                                                    disabled={!editMode}
-                                                />
-                                            </Grid>
-                                            <Grid item xs={12} sm={6}>
-                                                <TextField
-                                                    fullWidth
-                                                    label="Email"
-                                                    name="email"
-                                                    value={profileData.email}
-                                                    onChange={handleChange}
-                                                    disabled={!editMode}
-                                                />
-                                            </Grid>
-                                            <Grid item xs={12}>
-                                                {editMode ? (
-                                                    <Button variant="contained" color="primary" fullWidth onClick={handleSave}>
-                                                        Save Changes
-                                                    </Button>
-                                                ) : (
-                                                    <Button variant="contained" color="primary" fullWidth onClick={() => setEditMode(true)}>
-                                                        Edit Profile
-                                                    </Button>
-                                                )}
-                                            </Grid>
-                                        </Grid>
-                                    </form>
-                                </CardContent>
-                            </Card>
-                        </Grid>
-                    </Grid>
-                    <Grid item xs={12} md={9} mt={4}>
+                    <Grid item xs={12} md={10}>
                         <Typography variant="h6" gutterBottom>
                             My Pages
                         </Typography>

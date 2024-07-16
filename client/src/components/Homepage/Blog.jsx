@@ -4,7 +4,7 @@ import {
   extendTheme, ChakraProvider, Textarea
 } from '@chakra-ui/react';
 import { BsTrash } from 'react-icons/bs';
-import { BiLike, BiChat, BiShare } from 'react-icons/bi';
+import {  BiChat, BiEdit } from 'react-icons/bi';
 import { AiOutlineUpload, AiOutlineEdit } from 'react-icons/ai';
 import { Global, css } from '@emotion/react';
 import Navbar from './Navbar';
@@ -111,6 +111,7 @@ const Blog = () => {
   const handleImageUpload = (event, post) => {
     const file = event.target.files[0];
     setPosts(prevPosts => prevPosts.map(p => (p.id === post.id ? { ...p, imageFile: file, image: URL.createObjectURL(file) } : p)));
+    
   };
 
   const handleAddPost = () => {
@@ -124,127 +125,127 @@ const Blog = () => {
       const comment = { content: commentContent, user_id: userId, post_id: postId };
       const newComment = await createComment(comment);
       setPosts(prevPosts =>
-          prevPosts.map(post =>
-              post.id === postId ? { ...post, comments: [...post.comments, newComment] } : post
-          )
+        prevPosts.map(post =>
+          post.id === postId ? { ...post, comments: [...post.comments, newComment] } : post
+        )
       );
       setCommentContent('');
       setCurrentCommentPostId(null);
+      toast({ title: "Comment Added successfully.", status: "success", duration: 3000, isClosable: true });
     } catch (error) {
       console.error('Error adding comment:', error);
     }
   };
 
   return (
-      <ChakraProvider theme={theme}>
-        <Navbar />
-        <Global styles={keyframes} />
-        <Flex align="center" justify="center" minHeight="auto" className="content" padding="10rem">
-          <Box>
-            <Button onClick={handleAddPost} colorScheme="blue" mb={4}>Add Post</Button>
-            {posts.map(post => (
-                <Card key={post.id} bg="white" p="5" rounded="md" shadow="md" m="4" width="800px" w="full">
-                  <CardHeader>
-                    <Flex justify='space-between'>
-                      <Avatar name={post.userName} src='https://via.placeholder.com/150' />
-                      <Box pl={2}>
-                        <Heading size='sm'>{post.userName}</Heading>
-                        <Text fontSize='sm'>{post.userEmail}</Text>
-                      </Box>
-                      {post.user_id === userId && (
-                          <>
-                            <IconButton
-                                variant='ghost'
-                                aria-label='Edit'
-                                icon={<AiOutlineEdit />}
-                                onClick={() => handleEditPost(post.id)}
-                            />
-                            <IconButton
-                                variant='ghost'
-                                aria-label='Delete'
-                                icon={<BsTrash />}
-                                onClick={() => handleDeletePost(post.id)}
-                            />
-                          </>
-                      )}
-                    </Flex>
-                  </CardHeader>
-                  <CardBody>
-                    {editingPostId === post.id ? (
-                        <Box>
-                          <Input
-                              placeholder="Title"
-                              value={post.title}
-                              onChange={(e) => setPosts(prevPosts => prevPosts.map(p => (p.id === post.id ? { ...p, title: e.target.value } : p)))}
-                              mb={4}
-                          />
-                          <Textarea
-                              placeholder="What do you want to discuss?"
-                              value={post.content}
-                              onChange={(e) => setPosts(prevPosts => prevPosts.map(p => (p.id === post.id ? { ...p, content: e.target.value } : p)))}
-                              mb={4}
-                          />
-                          {post.image && (
-                              <Image objectFit='cover' src={post.imageUrl || post.image} alt={post.title} mb={4} />
-                          )}
-                          <Flex justify="space-between" align="center" mb={4}>
-                            <Input type="file" id={`upload-${post.id}`} style={{ display: 'none' }} onChange={(e) => handleImageUpload(e, post)} />
-                            <label htmlFor={`upload-${post.id}`}>
-                              <IconButton as="span" icon={<AiOutlineUpload />} aria-label="Upload Image" />
-                            </label>
-                          </Flex>
-                          <Button colorScheme="blue" onClick={() => handleSavePost(post)}>Save</Button>
-                        </Box>
-                    ) : (
-                        <>
-                          <Heading size='md' mb={2}>{post.title}</Heading>
-                          <Text>{post.content}</Text>
-                          {post.image && (
-                              <Image objectFit='cover' src={post.imageUrl || post.image} alt={post.title} />
-                          )}
-                          {post.comments && post.comments.length > 0 && (
-                              <Box mt={4}>
-                                <Heading size='sm'>Comments</Heading>
-                                {post.comments.map(comment => (
-                                    <Box key={comment.id} mt={2} p={2} bg="gray.100" rounded="md">
-                                      <Text><strong>{comment.userName}:</strong> {comment.content}</Text>
-                                    </Box>
-                                ))}
-                              </Box>
-                          )}
-                        </>
-                    )}
-                  </CardBody>
-                  <CardFooter
-                      justify='space-between'
-                      flexWrap='wrap'
-                      sx={{
-                        '& > button': {
-                          minW: '136px',
-                        },
-                      }}
-                  >
-                    <Button flex='1' variant='ghost' leftIcon={<BiLike />}>Like</Button>
-                    <Button flex='1' variant='ghost' leftIcon={<BiChat />} onClick={() => setCurrentCommentPostId(post.id)}>Comment</Button>
-                    <Button flex='1' variant='ghost' leftIcon={<BiShare />}>Share</Button>
-                  </CardFooter>
-                  {currentCommentPostId === post.id && (
-                      <Box mt={4}>
-                        <Textarea
-                            placeholder="Write your comment..."
-                            value={commentContent}
-                            onChange={(e) => setCommentContent(e.target.value)}
-                            mb={4}
-                        />
-                        <Button colorScheme="blue" onClick={() => handleAddComment(post.id)}>Add Comment</Button>
-                      </Box>
+    <ChakraProvider theme={theme}>
+      <Navbar />
+      <Global styles={keyframes} />
+      <Flex align="center" justify="center" minHeight="auto" className="content" padding="10rem">
+        <Box>
+          <Button onClick={handleAddPost} colorScheme="blue" mb={4}>Add Post</Button>
+          {posts.map(post => (
+            <Card key={post.id} bg="white" p="5" rounded="md" shadow="md" m="4" width="800px" w="full">
+              <CardHeader>
+                <Flex justify='space-between'>
+                  <Avatar name={post.userName} src='https://via.placeholder.com/150' />
+                  <Box pl={2}>
+                    <Heading size='sm'>{post.userName}</Heading>
+                    <Text fontSize='sm'>{post.userEmail}</Text>
+                  </Box>
+                  {post.user_id === userId && (
+                    <>
+                      <IconButton
+                        variant='ghost'
+                        aria-label='Edit'
+                        icon={<AiOutlineEdit />}
+                        onClick={() => handleEditPost(post.id)}
+                      />
+                      <IconButton
+                        variant='ghost'
+                        aria-label='Delete'
+                        icon={<BsTrash />}
+                        onClick={() => handleDeletePost(post.id)}
+                      />
+                    </>
                   )}
-                </Card>
-            ))}
-          </Box>
-        </Flex>
-        <Footer />
-      </ChakraProvider>
+                </Flex>
+              </CardHeader>
+              <CardBody>
+                {editingPostId === post.id ? (
+                  <Box>
+                    <Input
+                      placeholder="Title"
+                      value={post.title}
+                      onChange={(e) => setPosts(prevPosts => prevPosts.map(p => (p.id === post.id ? { ...p, title: e.target.value } : p)))}
+                      mb={4}
+                    />
+                    <Textarea
+                      placeholder="What do you want to discuss?"
+                      value={post.content}
+                      onChange={(e) => setPosts(prevPosts => prevPosts.map(p => (p.id === post.id ? { ...p, content: e.target.value } : p)))}
+                      mb={4}
+                    />
+                    {post.image && (
+                      <Image objectFit='cover' src={post.imageUrl || post.image} alt={post.title} mb={4} />
+                    )}
+                    <Flex justify="space-between" align="center" mb={4}>
+                      <Input type="file" id={`upload-${post.id}`} style={{ display: 'none' }} onChange={(e) => handleImageUpload(e, post)} />
+                      <label htmlFor={`upload-${post.id}`}>
+                        <IconButton as="span" icon={<AiOutlineUpload />} aria-label="Upload Image" />
+                      </label>
+                    </Flex>
+                    <Button colorScheme="blue" onClick={() => handleSavePost(post)}>Save</Button>
+                  </Box>
+                ) : (
+                  <>
+                    <Heading size='md' mb={2}>{post.title}</Heading>
+                    <Text>{post.content}</Text>
+                    {post.image && (
+                      <Image objectFit='cover' src={post.imageUrl || post.image} alt={post.title} />
+                    )}
+                    {post.comments && post.comments.length > 0 && (
+                      <Box mt={4}>
+                        <Heading size='sm'>Comments</Heading>
+                        {post.comments.map(comment => (
+                          <Box key={comment.id} mt={2} p={2} bg="gray.100" rounded="md">
+                            <Text><strong>{comment.userName}:</strong> {comment.content}</Text>
+                          </Box>
+                        ))}
+                      </Box>
+                    )}
+                  </>
+                )}
+              </CardBody>
+              <CardFooter
+                justify='space-between'
+                flexWrap='wrap'
+                sx={{
+                  '& > button': {
+                    minW: '136px',
+                  },
+                }}
+              >
+                <Button flex='1' variant='ghost' leftIcon={<BiEdit />} onClick={() => handleEditPost (post.id)}>Edit</Button>
+                <Button flex='1' variant='ghost' leftIcon={<BiChat />} onClick={() => setCurrentCommentPostId(post.id)}>Comment</Button>
+              </CardFooter>
+              {currentCommentPostId === post.id && (
+                <Box mt={4}>
+                  <Textarea
+                    placeholder="Write your comment..."
+                    value={commentContent}
+                    onChange={(e) => setCommentContent(e.target.value)}
+                    mb={4}
+                  />
+                  <Button colorScheme="blue" onClick={() => handleAddComment(post.id)}>Add Comment</Button>
+                </Box>
+              )}
+            </Card>
+          ))}
+        </Box>
+      </Flex>
+      <Footer />
+    </ChakraProvider>
   );
 };
 

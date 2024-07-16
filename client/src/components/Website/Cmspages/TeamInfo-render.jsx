@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Flex, Image, Text, Heading } from '@chakra-ui/react';
 import { fetchPageById } from '../../../api/cmsApi';
 
-const TeamSection = ({ pageId }) => {
+const TeamInfo = ({ pageId }) => {
     const [teamMembers, setTeamMembers] = useState([]);
     const [teamInfo, setTeamInfo] = useState({ title: '', description: '' });
 
@@ -39,4 +39,4 @@ const TeamSection = ({ pageId }) => {
     );
 };
 
-export default TeamSection;
+export default TeamInfo;

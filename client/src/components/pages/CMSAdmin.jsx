@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Box, Heading, Text, Button, SimpleGrid, Center } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
-import { fetchAllPages } from '../../api/cmsApi'; // Ensure this path is correct
+import { fetchAllPages } from '../../api/cmsApi';
 
 class CMSAdmin extends Component {
     constructor(props) {

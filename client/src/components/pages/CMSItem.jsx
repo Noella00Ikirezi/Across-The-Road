@@ -1,64 +1,40 @@
-import React, { useState } from 'react';
-import { Flex, Button, Heading, FormControl, FormLabel, Input, useToast } from '@chakra-ui/react';
-import { insertData } from '../../api/cmsApi';
+import React, { useState, useEffect } from 'react';
+import {
+    Flex,
+    Button,
+    Heading,
+    FormControl,
+    FormLabel,
+    Input,
+    useToast,
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalFooter,
+    ModalBody,
+    ModalCloseButton
+} from '@chakra-ui/react';
 import { useAuth } from '../../api/authContext';
-
 import About from '../Website/Cms/About';
 import Navbar from '../Website/Cms/Navbar';
 import Footer from '../Website/Cms/Footer';
-import FeedbackSection from '../Website/Cms/FeedbackSection';
 import Service from '../Website/Cms/Service';
-import TeamSection from '../Website/Cms/TeamSection';
+import TeamInfo from '../Website/Cms/TeamInfo';
+import TeamMember from '../Website/Cms/TeamMember';
+import { createPage } from '../../api/API';
 
 const CMSItem = () => {
     const [pageData, setPageData] = useState({ title: '', url: '' });
-    const [componentsData, setComponentsData] = useState({
-        navbar: {},
-        aboutSections: [],
-        services: [],
-        feedbacks: [],
-        teamMembers: { members: [], info: {} },
-        footer: {},
-    });
-    const { authToken } = useAuth(); // Ensure the authToken is used
+    const { authToken, userId, logout } = useAuth();
     const toast = useToast();
+    const [isModalOpen, setIsModalOpen] = useState(true);
 
-    const appendImagesToFormData = (formData) => {
-        console.log('Appending images to FormData');
-        if (componentsData.navbar.logo) {
-            formData.append('navbar_logo', componentsData.navbar.logo);
+    useEffect(() => {
+        if (!authToken) {
+            logout();
         }
-
-        if (Array.isArray(componentsData.aboutSections)) {
-            componentsData.aboutSections.forEach((section, index) => {
-                if (section.imageFile) {
-                    formData.append(`about_image_${index}`, section.imageFile);
-                }
-            });
-        }
-
-        componentsData.services.forEach((service, index) => {
-            if (service.img) {
-                formData.append(`service_image_${index}`, service.img);
-            }
-        });
-
-        componentsData.feedbacks.forEach((feedback, index) => {
-            if (feedback.img) {
-                formData.append(`feedback_image_${index}`, feedback.img);
-            }
-        });
-
-        componentsData.teamMembers.members.forEach((member, index) => {
-            if (member.img) {
-                formData.append(`team_image_${index}`, member.img);
-            }
-        });
-
-        if (componentsData.footer.imageFile) {
-            formData.append('footer_image', componentsData.footer.imageFile);
-        }
-    };
+    }, [authToken, logout]);
 
     const handleSavePage = async () => {
         if (!pageData.title.trim()) {
@@ -72,44 +48,27 @@ const CMSItem = () => {
             return;
         }
 
+        const trimmedUrl = `/${pageData.title.trim().replace(/\s+/g, '-')}`;
+        const pagePayload = { title: pageData.title, url: trimmedUrl, userId };
+
         try {
-            console.log('Preparing to save page');
-            const trimmedUrl = `/${pageData.title.trim().replace(/\s+/g, '-')}`;
-            const page = { ...pageData, url: trimmedUrl, componentsData };
-
-            const formData = new FormData();
-            formData.append('title', page.title);
-            formData.append('url', page.url);
-            formData.append('componentsData', JSON.stringify(page.componentsData));
-
-            appendImagesToFormData(formData);
-
-            console.log('FormData prepared:', formData);
-            console.log('AuthToken:', authToken);
-            await insertData(formData, authToken); // Pass authToken here
-
+            await createPage(pagePayload, authToken);
+            setPageData((prev) => ({ ...prev, url: trimmedUrl }));
+            setIsModalOpen(false);
             toast({
-                title: 'Page saved',
-                description: 'Page and components saved successfully.',
+                title: 'Page initialized',
+                description: 'You can now edit the page components.',
                 status: 'success',
                 duration: 3000,
                 isClosable: true,
             });
         } catch (error) {
-            console.error('Failed to save page:', error);
-            let errorMessage = 'Failed to save page.';
-
-            if (error.response && error.response.status === 400) {
-                errorMessage = error.response.data.error === 'Page with the same URL already exists'
-                    ? 'A page with the same URL already exists. Please choose a different title.'
-                    : error.response.data.error;
-            }
-
+            console.error('Failed to create page:', error);
             toast({
                 title: 'Error',
-                description: errorMessage,
+                description: 'Failed to create page.',
                 status: 'error',
-                duration: 5000,
+                duration: 3000,
                 isClosable: true,
             });
         }
@@ -122,50 +81,31 @@ const CMSItem = () => {
 
     return (
         <Flex direction="column" width="100%" bg="#010132" p={4}>
+            <Modal isOpen={isModalOpen} onClose={() => {}} isCentered>
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader>Initialize Page</ModalHeader>
+                    <ModalCloseButton />
+                    <ModalBody>
+                        <FormControl>
+                            <FormLabel>Page Title</FormLabel>
+                            <Input type="text" name="title" value={pageData.title} onChange={handleChange} />
+                        </FormControl>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button colorScheme="blue" onClick={handleSavePage}>Save</Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
             <Flex mb={4} justifyContent="space-between" alignItems="center">
-                <Heading color="white">Create Page</Heading>
-                <FormControl>
-                    <FormLabel color="white">Page Title</FormLabel>
-                    <Input color="white" type="text" name="title" value={pageData.title} onChange={handleChange} />
-                </FormControl>
-                <Button colorScheme="blue" onClick={handleSavePage}>Save Page</Button>
+                <Heading color="white">Edit Page: {pageData.title}</Heading>
             </Flex>
-            <Navbar
-                initialData={componentsData.navbar}
-                setInitialData={(data) => {
-                    setComponentsData((prev) => ({ ...prev, navbar: data }));
-                }}
-            />
-            <About
-                initialData={componentsData.aboutSections}
-                setInitialData={(data) => {
-                    setComponentsData((prev) => ({ ...prev, aboutSections: data }));
-                }}
-            />
-            <FeedbackSection
-                initialData={componentsData.feedbacks}
-                setInitialData={(data) => {
-                    setComponentsData((prev) => ({ ...prev, feedbacks: data }));
-                }}
-            />
-            <Service
-                initialData={componentsData.services}
-                setInitialData={(data) => {
-                    setComponentsData((prev) => ({ ...prev, services: data }));
-                }}
-            />
-            <TeamSection
-                initialData={componentsData.teamMembers}
-                setInitialData={(data) => {
-                    setComponentsData((prev) => ({ ...prev, teamMembers: data }));
-                }}
-            />
-            <Footer
-                initialData={componentsData.footer}
-                setInitialData={(data) => {
-                    setComponentsData((prev) => ({ ...prev, footer: data }));
-                }}
-            />
+            <Navbar pageId={pageData.url} userId={userId} />
+            <About pageId={pageData.url} userId={userId} />
+            <Service pageId={pageData.url} userId={userId} />
+            <TeamInfo pageId={pageData.url} userId={userId} />
+            <TeamMember pageId={pageData.url} userId={userId} />
+            <Footer pageId={pageData.url} userId={userId} />
         </Flex>
     );
 };

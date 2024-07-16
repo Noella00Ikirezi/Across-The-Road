@@ -13,7 +13,7 @@ export const login = async (credentials) => {
 
     const { token, user } = response.data;
 
-    // Store token and user ID in localStorage (if needed, can be done here or in the calling component)
+
     localStorage.setItem('authToken', token);
     localStorage.setItem('userId', user.id);
     localStorage.setItem('userName', user.name);
@@ -35,18 +35,7 @@ export const register = async (credentials) => {
   }
 };
 
-export const logout = async () => {
-  try {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('userName');
-    await apiClient.post('/logout');
-    console.log('Logged out successfully');
-  } catch (error) {
-    console.error('Logout error:', error);
-    throw new Error('Failed to log out: ' + (error.response ? error.response.data.message : error.message));
-  }
-};
+
 
 export const resetPassword = async (email) => {
   try {
@@ -84,16 +73,3 @@ export const updateProfile = async (profileData) => {
   }
 };
 
-export const getAllUsers = async (authToken) => {
-  try {
-    const response = await apiClient.get('/users', {
-      headers: {
-        Authorization: `Bearer ${authToken}`
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching users:', error);
-    throw error;
-  }
-};

@@ -10,9 +10,12 @@ import {
     Text,
     Link,
     Image,
+    InputGroup,
+    InputRightElement,
     extendTheme,
     ChakraProvider
 } from '@chakra-ui/react';
+import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import logo from '../../assets/logo_b.png';
 
 const theme = extendTheme({
@@ -31,12 +34,14 @@ function Register() {
     const [formData, setFormData] = useState({
         last_name: '',
         first_name: '',
-        birthday: '',
+        birthdate: '',
         email: '',
         phone: '',
         password: '',
         confirmPassword: '',
     });
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
@@ -89,6 +94,14 @@ function Register() {
         }
     };
 
+    const toggleShowPassword = () => {
+        setShowPassword(!showPassword);
+    };
+
+    const toggleShowConfirmPassword = () => {
+        setShowConfirmPassword(!showConfirmPassword);
+    };
+
     return (
         <ChakraProvider theme={theme}>
             <Flex minHeight="100vh" align="center" justify="center">
@@ -105,7 +118,7 @@ function Register() {
                                 <Input placeholder="First Name" name="first_name" value={formData.first_name} onChange={handleChange} bg="white" color="gray.800" _placeholder={{ color: 'gray.500' }} />
                             </FormControl>
                             <FormControl>
-                                <Input type="date" placeholder="Birthday" name="birthday" value={formData.birthday} onChange={handleChange} bg="white" color="gray.800" _placeholder={{ color: 'gray.500' }} />
+                                <Input type="date" placeholder="Birthdate" name="birthdate" value={formData.birthdate} onChange={handleChange} bg="white" color="gray.800" _placeholder={{ color: 'gray.500' }} />
                             </FormControl>
                             <FormControl isRequired>
                                 <Input placeholder="Email" type="email" name="email" value={formData.email} onChange={handleChange} bg="white" color="gray.800" _placeholder={{ color: 'gray.500' }} />
@@ -114,10 +127,40 @@ function Register() {
                                 <Input placeholder="Phone Number" name="phone" value={formData.phone} onChange={handleChange} bg="white" color="gray.800" _placeholder={{ color: 'gray.500' }} />
                             </FormControl>
                             <FormControl isRequired>
-                                <Input placeholder="Password" type="password" name="password" value={formData.password} onChange={handleChange} bg="white" color="gray.800" />
+                                <InputGroup>
+                                    <Input
+                                        placeholder="Password"
+                                        type={showPassword ? "text" : "password"}
+                                        name="password"
+                                        value={formData.password}
+                                        onChange={handleChange}
+                                        bg="white"
+                                        color="gray.800"
+                                    />
+                                    <InputRightElement>
+                                        <Button variant="ghost" onClick={toggleShowPassword}>
+                                            {showPassword ? <ViewOffIcon /> : <ViewIcon />}
+                                        </Button>
+                                    </InputRightElement>
+                                </InputGroup>
                             </FormControl>
                             <FormControl isRequired>
-                                <Input placeholder="Confirm Password" type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} bg="white" color="gray.800" />
+                                <InputGroup>
+                                    <Input
+                                        placeholder="Confirm Password"
+                                        type={showConfirmPassword ? "text" : "password"}
+                                        name="confirmPassword"
+                                        value={formData.confirmPassword}
+                                        onChange={handleChange}
+                                        bg="white"
+                                        color="gray.800"
+                                    />
+                                    <InputRightElement>
+                                        <Button variant="ghost" onClick={toggleShowConfirmPassword}>
+                                            {showConfirmPassword ? <ViewOffIcon /> : <ViewIcon />}
+                                        </Button>
+                                    </InputRightElement>
+                                </InputGroup>
                             </FormControl>
                             <Button type="submit" colorScheme="purple" width="full">Register</Button>
                         </VStack>

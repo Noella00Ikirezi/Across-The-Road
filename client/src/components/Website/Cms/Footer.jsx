@@ -1,50 +1,75 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Flex, Image, IconButton, Text, Switch, useToast } from '@chakra-ui/react';
+import React, { useState } from 'react';
+import { Flex, Box, Image, IconButton, Text, Switch, useToast, Button } from '@chakra-ui/react';
 import { FaUpload } from 'react-icons/fa';
+import { useAuth } from '../../../api/authContext';
+import { uploadFooterLogo } from '../../../api/API';
 
-const Footer = ({ initialData, setInitialData }) => {
-    const [logo, setLogo] = useState(initialData.logo || '');
+const Footer = ({ pageId }) => {
+    const [previewLogo, setPreviewLogo] = useState('');
     const [isEditable, setIsEditable] = useState(false);
     const toast = useToast();
-
-    useEffect(() => {
-        if (initialData.logo) {
-            setLogo(initialData.logo);
-        }
-    }, [initialData]);
+    const { authToken, userId } = useAuth();
 
     const handleLogoChange = (event) => {
         const file = event.target.files[0];
         if (file) {
             const newLogoUrl = URL.createObjectURL(file);
-            console.log('New Logo URL:', newLogoUrl); // Debugging
-            setLogo(newLogoUrl);
-            setInitialData((prevData) => ({
-                ...prevData,
-                footer: {
-                    ...prevData.footer,
-                    logo: newLogoUrl,
-                    imageFile: file
-                }
-            }));
-
-            toast({
-                title: 'Logo updated',
-                description: 'The logo has been updated successfully.',
-                status: 'success',
-                duration: 3000,
-                isClosable: true,
-            });
+            setPreviewLogo(newLogoUrl);
         }
     };
 
-    console.log('Current Logo:', logo); // Debugging
+    const handleSaveLogo = async () => {
+        const fileInput = document.getElementById('footerLogoInput');
+        const file = fileInput.files[0];
+
+        if (!userId) {
+            console.error('User ID is not available');
+            toast({
+                title: 'Error',
+                description: 'User ID is not available.',
+                status: 'error',
+                duration: 3000,
+                isClosable: true,
+            });
+            return;
+        }
+
+        if (file) {
+            const formData = new FormData();
+            formData.append('footer_image', file); // Ensure this matches the field name in backend
+            formData.append('userId', userId);
+            formData.append('pageId', pageId);
+
+            try {
+                console.log('Uploading logo...');
+                await uploadFooterLogo(formData, authToken);
+                console.log('Logo uploaded successfully');
+                setPreviewLogo('');
+                toast({
+                    title: 'Logo updated',
+                    description: 'The logo has been updated successfully.',
+                    status: 'success',
+                    duration: 3000,
+                    isClosable: true,
+                });
+            } catch (error) {
+                console.error('Error uploading logo:', error);
+                toast({
+                    title: 'Error',
+                    description: 'Failed to upload logo.',
+                    status: 'error',
+                    duration: 3000,
+                    isClosable: true,
+                });
+            }
+        }
+    };
 
     return (
-        <Flex direction="column" align="center" justify="center" textAlign="center" fontFamily="Poppins" borderTop="2px solid #ffffff" borderRadius="20px" padding="1.5rem" background="linear-gradient(270deg, #010132 100%, #6f13ad 0%)" width="100%" margin="0">
+        <Flex direction="column" align="center" justify="center" textAlign="center" fontFamily="Poppins" borderTop="2px solid #ffffff" borderRadius="20px" padding="1.5rem" bg="#010132" width="100%" margin="0">
             <Box>
-                {logo ? (
-                    <Image color="white" src={logo} alt="Logo" boxSize="70px" />
+                {previewLogo ? (
+                    <Image color="white" src={previewLogo} alt="Logo" boxSize="70px" />
                 ) : (
                     <Box
                         width="70px"
@@ -70,6 +95,7 @@ const Footer = ({ initialData, setInitialData }) => {
                             size="sm"
                         />
                         <input id="footerLogoInput" type="file" accept="image/*" onChange={handleLogoChange} style={{ display: 'none' }} />
+                        <Button onClick={handleSaveLogo} ml={2} colorScheme="blue">Save</Button>
                     </>
                 )}
             </Box>
